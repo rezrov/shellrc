@@ -40,70 +40,70 @@ function gen_rand {
 # A set of functions to manage ssh-agent in a way that is compatible with multiple login sessions.
 # https://superuser.com/questions/141044/sharing-the-same-ssh-agent-among-multiple-login-sessions/230872#230872
 
-function sshagent_findsockets {
-  find /tmp -uid $(id -u) -type s -name agent.\* 2>/dev/null
-}
+if [ -x "$(which ssh-add)" ] && [ -x "$(which ssh-agent)" ]; then
 
-function sshagent_testsocket {
+  function sshagent_findsockets {
+    find /tmp -uid $(id -u) -type s -name agent.\* 2>/dev/null
+  }
 
-  if [ X"$1" != X ]; then
-    export SSH_AUTH_SOCK=$1
-  fi
+  function sshagent_testsocket {
 
-  if [ X"$SSH_AUTH_SOCK" = X ]; then
-    return 2
-  fi
-
-  if [ -S $SSH_AUTH_SOCK ]; then
-    ssh-add -l >/dev/null
-    if [ $? = 2 ]; then
-      iecho "Socket $SSH_AUTH_SOCK is dead!  Deleting!"
-      rm -f $SSH_AUTH_SOCK
-      return 4
-    else
-      iecho "Found ssh-agent $SSH_AUTH_SOCK"
-      return 0
+    if [ X"$1" != X ]; then
+      export SSH_AUTH_SOCK=$1
     fi
-  else
-    iecho "$SSH_AUTH_SOCK is not a socket!"
-    return 3
-  fi
-}
 
-function sshagent_init {
-  # ssh agent sockets can be attached to a ssh daemon process or an
-  # ssh-agent process.
+    if [ X"$SSH_AUTH_SOCK" = X ]; then
+      return 2
+    fi
 
-  if [ ! -x "$(which ssh-add)" ]; then
-    iecho "ssh-agent is unavailable"
-    return 1
-  fi
+    if [ -S $SSH_AUTH_SOCK ]; then
+      ssh-add -l >/dev/null
+      if [ $? = 2 ]; then
+        iecho "Socket $SSH_AUTH_SOCK is dead!  Deleting!"
+        rm -f $SSH_AUTH_SOCK
+        return 4
+      else
+        iecho "Found ssh-agent $SSH_AUTH_SOCK"
+        return 0
+      fi
+    else
+      iecho "$SSH_AUTH_SOCK is not a socket!"
+      return 3
+    fi
+  }
 
-  AGENTFOUND=0
+  function sshagent_init {
+    # ssh agent sockets can be attached to a ssh daemon process or an
+    # ssh-agent process.
 
-  # Attempt to find and use the ssh-agent in the current environment
-  if sshagent_testsocket; then AGENTFOUND=1; fi
+    AGENTFOUND=0
 
-  # If there is no agent in the environment, search /tmp for
-  # possible agents to reuse before starting a fresh ssh-agent
-  # process.
-  if [ $AGENTFOUND = 0 ]; then
-    for agentsocket in $(sshagent_findsockets); do
-      if [ $AGENTFOUND != 0 ]; then break; fi
-      if sshagent_testsocket $agentsocket; then AGENTFOUND=1; fi
-    done
-  fi
+    # Attempt to find and use the ssh-agent in the current environment
+    if sshagent_testsocket; then AGENTFOUND=1; fi
 
-  # If at this point we still haven't located an agent, it's time to
-  # start a new one
-  if [ $AGENTFOUND = 0 ]; then
-    eval $(ssh-agent)
-  fi
+    # If there is no agent in the environment, search /tmp for
+    # possible agents to reuse before starting a fresh ssh-agent
+    # process.
+    if [ $AGENTFOUND = 0 ]; then
+      for agentsocket in $(sshagent_findsockets); do
+        if [ $AGENTFOUND != 0 ]; then break; fi
+        if sshagent_testsocket $agentsocket; then AGENTFOUND=1; fi
+      done
+    fi
 
-  # Clean up
-  unset AGENTFOUND
-  unset agentsocket
+    # If at this point we still haven't located an agent, it's time to
+    # start a new one
+    if [ $AGENTFOUND = 0 ]; then
+      eval $(ssh-agent)
+    fi
 
-  # Finally, show what keys are currently in the agent
-  ssh-add -l
-}
+    # Clean up
+    unset AGENTFOUND
+    unset agentsocket
+
+    # Finally, show what keys are currently in the agent
+    ssh-add -l
+
+  }
+
+fi
