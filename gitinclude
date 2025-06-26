@@ -1,0 +1,60 @@
+[core]
+    whitespace = tabwidth=4 trailing-space space-before-tab indent-with-non-tab tab-in-indent
+[push]
+	default = simple
+[credential]
+	helper = cache --timeout 3600
+[alias]
+
+    # A few more you might like here: https://gist.github.com/rezrov/a86bcddcdb97fd975025c5cf734cdada
+
+    # List these aliases
+    la = "!git config -l | grep alias | cut -c 7-"
+
+    # Save typing two letters! Convenient for svn converts.
+    stat = status
+
+    # List ignored files
+    lsi = ls-files . --ignored --exclude-standard --others --directory
+
+    # List untracked files
+    lsu = ls-files . --exclude-standard --others --directory
+
+    # Diff ignoring blank lines and whitespace
+    diffb = diff -b -w --minimal --ignore-blank-lines --ignore-space-at-eol
+
+    # Show changes that have been staged
+    diffc = diff -b -w --minimal --ignore-blank-lines --ignore-space-at-eol --cached
+
+    # Show only the filenames that have changed, not the contents
+    diffd = diff -b -w --minimal --ignore-blank-lines --ignore-space-at-eol --name-status
+
+    # Print a pretty log
+    hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+
+    # Clone only one branch (-b, default HEAD) and no history, saves time and disk
+    clite = clone --depth=1 --single-branch
+
+    # Add and commit, remember to write your commit message, ex. git addc 'fixing a bug'
+    addc = !git add . && git commit -am
+
+[color]
+    branch = auto
+    diff = auto
+    status = auto
+
+[color "branch"]
+    current = yellow reverse
+    local = yellow bold
+    remote = green bold
+
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color "status"]
+    added = yellow bold
+    changed = green bold
+    untracked = red bold
