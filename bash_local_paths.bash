@@ -9,6 +9,14 @@ source "$HOME/.shellrc/bash_system_paths.bash"
 
 # MODIFICATIONS BELOW THIS LINE
 
+# NOTE: Be aware of the security implications of having directories editable
+# by a non-privileged user in your PATH.
+
+# Uncomment to add .shellrc/bin to your PATH. A good place to put all
+# of your custom scripts.
+#
+# prepend_to_path "$HOME/.shellrc/bin"
+
 # Uncomment the following to use local npm and pnpm directories
 #
 # NPM_CONFIG_PREFIX="$HOME/.npmlocal"
