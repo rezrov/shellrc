@@ -138,7 +138,8 @@ Shell configuration can get awfully complex (see Bash Startup section below) and
 it can be hard to track down problems.
 
 Take a look at each of the files below and make modifications where appropriate. Each file indicates whether or not it
-should be modified, and where those modifications should go, in header comments.
+should be modified, and where those modifications should go, in header comments. If you can keep your changes in the
+indicated locations, it will be easier to merge upstream changes later.
 
 ### bash_aliases.bash ###
 
