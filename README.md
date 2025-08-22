@@ -46,7 +46,8 @@ way to do this, let me know.)
 
 ```bash
 # MacOS only
-mv ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.backup
+mkdir -p ~/.config/kitty
+mv -f ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.backup
 ln -s ~/.shellrc/kitty/macos/kitty.conf ~/.config/kitty/kitty.conf
 ```
 
@@ -89,7 +90,8 @@ Restart kitty to make the changes take effect.
 Redirect the system-installed fish configuration to the version in your .shellrc directory:
 
 ```fish
-rm ~/.config/fish/config.fish
+mkdir -p ~/.config/fish
+mv -f ~/.config/fish/config.fish ~/.config/fish/config.fish.orig
 ln -s ~/.shellrc/config.fish ~/.config/fish/config.fish
 ```
 
