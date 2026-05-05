@@ -7,6 +7,9 @@ terminal emulator if you prefer.
 
 ## A Note For Mac Users ##
 
+**Apple Silicon Macs only.** This project hardcodes the Homebrew prefix at `/opt/homebrew` and is not tested or
+supported on Intel Macs.
+
 Everything here assumes you've already installed [Homebrew](https://brew.sh/). If you're using [Nix](https://nixos.org/)
 or another package manager instead, you might need to tweak a few things. In any case, **you need to be using a
 relatively recent version of GNU bash**, not the bash shell that comes with macOS.
@@ -32,11 +35,15 @@ Once you've got your own fork, run the following:
 
 ```bash
 cd
-mkdir backuprc
-mv .bashrc .profile .bash_profile .bash_login .bash_logout .shellrc backuprc
+mkdir -p backuprc
+for f in .bashrc .profile .bash_profile .bash_login .bash_logout .shellrc; do
+  if [ -e "$f" ] || [ -L "$f" ]; then
+    mv "$f" backuprc/
+  fi
+done
 git clone https://github.com/yourusername/shellrc.git .shellrc
-ln -s .shellrc/profile.bash .profile
-ln -s .shellrc/bashrc.bash .bashrc
+ln -sf .shellrc/profile.bash .profile
+ln -sf .shellrc/bashrc.bash .bashrc
 ```
 
 MacOS users only: Since your bash environment variables won't be supplied to the
@@ -47,8 +54,10 @@ way to do this, let me know.)
 ```bash
 # MacOS only
 mkdir -p ~/.config/kitty
-mv -f ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.backup
-ln -s ~/.shellrc/kitty/macos/kitty.conf ~/.config/kitty/kitty.conf
+if [ -e ~/.config/kitty/kitty.conf ] || [ -L ~/.config/kitty/kitty.conf ]; then
+  mv -f ~/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf.backup
+fi
+ln -sf ~/.shellrc/kitty/macos/kitty.conf ~/.config/kitty/kitty.conf
 ```
 
 After you've completed installation and read the explanation of all the installed files below, review the contents of 
@@ -58,9 +67,9 @@ you can delete backuprc/.
 Now you're ready to try the new stuff. Close all your terminals (on macOS, right-click 
 the kitty icon in the menu bar and select "Quit") and open a new kitty session. You should have a new
 fish shell, with all your bash/fish configuration organized nicely in the .shellrc directory. If kitty won't launch,
-start another terminal emulator and double-check the path to your fish and bash shell binaries in the config files 
-under .shellrc/kitty, in the "shell" directive. This will likely be necessary if you're on macOS and either using a
-package manager other than Homebrew, or on an older Intel Mac.
+start another terminal emulator and double-check the path to your fish and bash shell binaries in the config files
+under .shellrc/kitty, in the "shell" directive. This will likely be necessary if you're on macOS and using a
+package manager other than Homebrew.
 
 ### How Am I Getting Fish Shell? ###
 
@@ -91,8 +100,10 @@ Redirect the system-installed fish configuration to the version in your .shellrc
 
 ```fish
 mkdir -p ~/.config/fish
-mv -f ~/.config/fish/config.fish ~/.config/fish/config.fish.orig
-ln -s ~/.shellrc/config.fish ~/.config/fish/config.fish
+if test -e ~/.config/fish/config.fish; or test -L ~/.config/fish/config.fish
+    mv -f ~/.config/fish/config.fish ~/.config/fish/config.fish.orig
+end
+ln -sf ~/.shellrc/config.fish ~/.config/fish/config.fish
 ```
 
 Take a look at .shellrc/config.fish now if you'd like to see what it's going to do. 

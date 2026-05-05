@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 # Put your custom fish functions in this file. They will not be available in
 # bash shell. Custom bash functions are in bash_functions_custom.fish
@@ -17,21 +17,26 @@ end
 # r COMMAND: Backgrounds a command in a screen session. The command's text
 # output is collected by screen and available via screen -r if you need it.
 function r
-    if [ "$argv" = "" ]
+    if test (count $argv) -eq 0
         echo "Usage: r COMMAND" 1>&2
-    else
-        set screen_which_test `which $argv[1] 2>&1`
-        if [ $status -ne 0 ]
-            echo $screen_which_test 1>&2
-        else
-            set screen_command_name `echo $argv[0] | sed -r 's/^.+\///g'`
-            screen -d -m -S "$screen_command_name" $argv[2..-1]
-        end
+        return 1
     end
+    if not command -v $argv[1] >/dev/null 2>&1
+        echo "r: $argv[1]: command not found" 1>&2
+        return 1
+    end
+    set -l screen_command_name (echo $argv[1] | sed -r 's/^.+\///g')
+    screen -d -m -S "$screen_command_name" $argv
 end
 
+# Generate a random string containing alphanumeric and special characters.
+# First argument is length, default 20.
+# Special characters included: _#!=.+
 function gen_rand
-    set pw_len $argv[1]
-    string match -r '^[0-9]{1,7}$' or set pw_len 20
-    set PW (cat /dev/urandom | tr -dc '2-9a-hjkmnp-zA-HJKMNP-Z_#!=.+' | head -c $pw_len)
+    set -l pw_len $argv[1]
+    if not string match -qr '^[0-9]{1,7}$' -- "$pw_len"
+        set pw_len 20
+    end
+    tr -dc '2-9a-hjkmnp-zA-HJKMNP-Z_#!=.+' </dev/urandom | head -c $pw_len
+    echo
 end

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Don't change these lines
-dir_colors=$(which dircolors 2>/dev/null)
+dir_colors=$(command -v dircolors 2>/dev/null)
 
 if [ -x "$dir_colors" ]; then
   eval $(dircolors ~/.shellrc/dircolors)
@@ -21,5 +21,5 @@ if [[ $TERM =~ color ]]; then
   # Ps = 5  -> blinking bar (xterm).
   # Ps = 6  -> steady bar (xterm).
   #            v
-  printf '\033[1 q\e]12;lime\a'
+  printf '\033[1 q\e]12;rgb:00/ff/00\a'
 fi

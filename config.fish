@@ -1,17 +1,20 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 # Symlink this file from ~/.config/fish/config.fish
 # Make your modifications in the section labeled "MODIFICATIONS HERE"
 
 function move_to_front
     set -l dir "$argv[1]"
-    set -e PATH[(contains -i "$dir" $PATH)]
+    set -l idx (contains -i -- "$dir" $PATH)
+    if test -n "$idx"
+        set -e PATH[$idx]
+    end
     set -p PATH "$dir"
 end
 
 set -l path_dirs $PATH
 
-for dir in () $path_dirs
+for dir in $path_dirs
     if string match -q "$HOME*" "$dir"
         move_to_front "$dir"
     end

@@ -9,11 +9,17 @@
 
 source ~/.shellrc/bash_aliases.bash
 
-IFS=$'\n'
-pat='^alias ([^=]+)=.(.+).$'
-for al in $(alias)
-do
-    if [[ $al =~ $pat ]]; then
-        echo "alias ${BASH_REMATCH[1]} '${BASH_REMATCH[2]}'; "
-    fi
-done
+# Bash's `alias` builtin always emits values in single quotes and
+# escapes embedded single quotes as '\''. Decode that to a literal
+# single quote, then re-encode for fish, where the only escapes
+# inside single-quoted strings are \\ and \'.
+pat="^alias ([^=]+)='(.*)'$"
+while IFS= read -r al; do
+    [[ $al =~ $pat ]] || continue
+    name="${BASH_REMATCH[1]}"
+    body="${BASH_REMATCH[2]}"
+    body="${body//\'\\\'\'/\'}"   # bash '\'' -> literal '
+    body="${body//\\/\\\\}"        # \ -> \\
+    body="${body//\'/\\\'}"        # ' -> \'
+    printf "alias %s '%s'; " "$name" "$body"
+done < <(alias)

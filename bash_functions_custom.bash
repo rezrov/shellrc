@@ -7,23 +7,23 @@
 # Remove trailing whitespace from all lines in text file (GNU sed)
 # https://stackoverflow.com/questions/4438306/how-to-remove-trailing-whitespaces-with-sed
 function rmts {
-  sed -Ei -e's/[[:space:]]*$//' $1
+  sed -Ei -e 's/[[:space:]]*$//' "$1"
 }
 
 # r COMMAND: Backgrounds a command in a screen session. The command's text
 # output is collected by screen and available via screen -r if you need it.
 function r {
-  if [ "$1" = "" ]; then
-    iecho "Usage: r COMMAND" 1>&2
-  else
-    SCREEN_WHICH_TEST=$(which $1 2>&1)
-    if [ $? -ne 0 ]; then
-      iecho $SCREEN_WHICH_TEST 1>&2
-    else
-      SCREEN_COMMAND_NAME=$(echo $1 | sed -r 's/^.+\///g')
-      screen -d -m -S "$SCREEN_COMMAND_NAME" $@
-    fi
+  if [ -z "$1" ]; then
+    echo "Usage: r COMMAND" 1>&2
+    return 1
   fi
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "r: $1: command not found" 1>&2
+    return 1
+  fi
+  local screen_command_name
+  screen_command_name=$(echo "$1" | sed -r 's/^.+\///g')
+  screen -d -m -S "$screen_command_name" "$@"
 }
 
 # Generate a random string containing alphanumeric and special characters.
@@ -31,16 +31,15 @@ function r {
 # Special characters included: _#!=.+
 function gen_rand {
   local pw_len=$1
-  local pw
   [[ $pw_len =~ ^[0-9]{1,7}$ ]] || pw_len=20
-  pw=$(tr -dc '2-9a-hjkmnp-zA-HJKMNP-Z_#!=.+' </dev/urandom | head -c "$pw_len")
-  iecho "$pw"
+  tr -dc '2-9a-hjkmnp-zA-HJKMNP-Z_#!=.+' </dev/urandom | head -c "$pw_len"
+  echo
 }
 
 # A set of functions to manage ssh-agent in a way that is compatible with multiple login sessions.
 # https://superuser.com/questions/141044/sharing-the-same-ssh-agent-among-multiple-login-sessions/230872#230872
 
-if [ -x "$(which ssh-add)" ] && [ -x "$(which ssh-agent)" ]; then
+if command -v ssh-add >/dev/null 2>&1 && command -v ssh-agent >/dev/null 2>&1; then
 
   function sshagent_findsockets {
     find /tmp -uid $(id -u) -type s -name agent.\* 2>/dev/null
