@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Reads aliases from bash shell and prints them in a format
 # that can be understood by fish. Note that the aliases
