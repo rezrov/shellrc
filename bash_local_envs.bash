@@ -40,3 +40,8 @@ if [ "$OS_TYPE" = "macos" ]; then
   export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
   export HOMEBREW_REPOSITORY="/opt/homebrew";
 fi
+
+# Grab any envs I don't want stored in the repo (.gitignored file)
+if [ -r "$HOME/.shellrc/bash_private_envs.bash" ]; then
+  source "$HOME/.shellrc/bash_private_envs.bash"
+fi

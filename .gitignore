@@ -1,3 +1,5 @@
 .idea/
 **/.DS_Store
 .omc/
+bash_private_envs.bash
+bashrc_private.bash
