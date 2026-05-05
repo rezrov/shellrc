@@ -30,6 +30,7 @@ Per-OS kitty terminal emulator configurations. Split into `macos/` and `linux/` 
 ### Common Patterns
 
 - `KITTY_CONFIG_DIRECTORY` is the env var that selects which subdir kitty reads from on Linux. macOS users symlink instead, per README.md.
+- On Linux, `KITTY_CONFIG_DIRECTORY` is exported by `bash_system_envs.bash` only if some shell has sourced `~/.profile` (or `~/.bashrc`) in the user's session. Desktop launchers under systemd-managed user sessions can launch kitty without that env var being present — the documented mitigation is `source ~/.profile` from `~/.xprofile`. See README.md "Linux users" note in the install section.
 
 ## Dependencies
 

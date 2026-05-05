@@ -18,8 +18,20 @@ export HISTFILESIZE=5000000
 export HISTCONTROL="ignoreboth"
 export FORCE_COLOR="true"
 export TZ="America/Detroit"
-export EDITOR="emacs"
-export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[00;38;5;33m\]\w \$\[\033[00m\] '
+
+for _ed in emacs vim nano vi; do
+  if command -v "$_ed" >/dev/null 2>&1; then
+    export EDITOR="$_ed"
+    break
+  fi
+done
+unset _ed
+
+if [[ $TERM =~ color ]]; then
+  export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[00;38;5;33m\]\w \$\[\033[00m\] '
+else
+  export PS1='\u@\h:\w \$ '
+fi
 umask 0022
 
 # You can set OS-specific environment variables

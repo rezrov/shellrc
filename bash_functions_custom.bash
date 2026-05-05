@@ -42,7 +42,11 @@ function gen_rand {
 if command -v ssh-add >/dev/null 2>&1 && command -v ssh-agent >/dev/null 2>&1; then
 
   function sshagent_findsockets {
-    find /tmp -uid $(id -u) -type s -name agent.\* 2>/dev/null
+    local search_dirs=("/tmp")
+    if [ -n "$TMPDIR" ] && [ "${TMPDIR%/}" != "/tmp" ]; then
+      search_dirs+=("$TMPDIR")
+    fi
+    find "${search_dirs[@]}" -uid "$(id -u)" -type s -name 'agent.*' 2>/dev/null
   }
 
   function sshagent_testsocket {

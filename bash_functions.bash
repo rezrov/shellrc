@@ -28,6 +28,10 @@ if ! declare -f set_os_type &>/dev/null; then
 
       export OS_TYPE
 
+      if [ "$OS_TYPE" = "macos" ] && [ "${BASH_VERSINFO[0]:-0}" -lt 4 ]; then
+        iecho "shellrc: warning: running macOS bash $BASH_VERSION; this config expects Homebrew GNU bash 4+. Some features may misbehave." >&2
+      fi
+
     fi
 
   }
@@ -38,13 +42,6 @@ if ! declare -f set_os_type &>/dev/null; then
         return 0
         ;;
     esac
-    return 1
-  }
-
-  function is_remote_shell {
-    if ps ax | grep ^$PPID'.*sshd' &>/dev/null; then
-      return 0
-    fi
     return 1
   }
 

@@ -58,7 +58,7 @@ alias hn='history |sed -r -e '\''s/^(\s*[0-9]+\s+)//g'\'''
 alias hg="hn|grep"
 
 # switch to fish shell
-alias ef="exec fish -i"
+alias ef='command -v fish >/dev/null && exec fish -i || echo "fish not installed" >&2'
 
 # Miscellaneous
 alias sl='screen -list'

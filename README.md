@@ -17,6 +17,14 @@ relatively recent version of GNU bash**, not the bash shell that comes with macO
 Install GNU bash via your preferred package manager. To make it your default shell, follow the top answer here:
 https://stackoverflow.com/questions/77052638/changing-default-shell-from-zsh-to-bash-on-macos-catalina-and-beyond
 
+This project also relies on the GNU versions of `sed`, `tar`, `grep`, and the `findutils` family being on your `$PATH`
+(several helper functions and aliases use GNU-only flags, and `bash_system_paths.bash` prepends the Homebrew
+`gnubin` directories accordingly). Install them with Homebrew:
+
+```bash
+brew install gnu-sed gnu-tar grep findutils
+```
+
 ## Prerequisites ##
 
 * [fish](https://fishshell.com/) shell (optional)
@@ -59,6 +67,21 @@ if [ -e ~/.config/kitty/kitty.conf ] || [ -L ~/.config/kitty/kitty.conf ]; then
 fi
 ln -sf ~/.shellrc/kitty/macos/kitty.conf ~/.config/kitty/kitty.conf
 ```
+
+Linux users: on Linux, the kitty config we use is selected via the `KITTY_CONFIG_DIRECTORY`
+environment variable, exported by `bash_system_envs.bash`. Some desktop session managers
+(notably systemd-managed user sessions launching kitty directly from a `.desktop` file)
+start kitty without first sourcing `~/.profile`, so the variable is unset and kitty falls
+back to your default `~/.config/kitty/kitty.conf` instead of ours. If you hit this, add
+the following to your `~/.xprofile` (or your desktop's equivalent of a per-session login
+script):
+
+```bash
+source ~/.profile
+```
+
+After logging out and back in, `KITTY_CONFIG_DIRECTORY` will be set in your session
+environment and kitty will pick up the right config.
 
 After you've completed installation and read the explanation of all the installed files below, review the contents of 
 backuprc/ to see if there's anything there you want to pull back into your new configuration. After you've done that,
