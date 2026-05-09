@@ -12,7 +12,7 @@ fi
 
 # MODIFICATIONS BELOW THIS LINE
 
-if [[ $TERM =~ color ]]; then
+if [ -t 1 ] && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
   # Ps = 0  -> blinking block.
   # Ps = 1  -> blinking block (default).
   # Ps = 2  -> steady block.
