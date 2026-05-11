@@ -1,45 +1,54 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-04 | Updated: 2026-05-04 -->
+<!-- Generated: 2026-05-10 | Updated: 2026-05-10 -->
 
 # kitty/macos
 
 ## Purpose
-kitty configuration for macOS. Hardcoded to Homebrew binary locations (`/opt/homebrew/bin/bash` and `/opt/homebrew/bin/fish`). The README.md install procedure asks users to symlink `~/.config/kitty/kitty.conf → ~/.shellrc/kitty/macos/kitty.conf` because the `KITTY_CONFIG_DIRECTORY` env var doesn't reach kitty when launched as a macOS GUI app.
+macOS-specific kitty configuration. Used via a manual symlink: `~/.config/kitty/kitty.conf` →
+`~/.shellrc/kitty/macos/kitty.conf`. Hardcodes Homebrew binary paths: `/opt/homebrew/bin/bash` and
+`/opt/homebrew/bin/fish` (Apple Silicon; Intel Macs are not supported).
 
 ## Key Files
 
 | File | Description |
 |------|-------------|
-| `kitty.conf` | macOS kitty configuration. Sets `shell /opt/homebrew/bin/bash -li -c "exec /opt/homebrew/bin/fish"`. Cosmetic options (font, scrollback, padding, background) are commented out for the user to opt in. |
+| `kitty.conf` | Sets `shell /opt/homebrew/bin/bash -li -c "exec /opt/homebrew/bin/fish"` so bash builds the env, then execs fish. `font_family`, `font_size`, scrollback, padding, theme lines are present but commented out. |
 
 ## For AI Agents
 
 ### Working In This Directory
 
-- The `shell` directive uses `bash -li` (login + interactive). The login flag matters: it ensures `profile.bash` runs, which is what fully populates the environment before fish takes over.
-- Paths assume Apple Silicon Homebrew (`/opt/homebrew`). For Intel Macs (`/usr/local`) or non-Homebrew installs, this file needs editing.
-- Unlike `../linux/kitty.conf`, this file does NOT `include ~/.config/kitty/kitty.conf` — that path is the symlink target on macOS, so including it would create a cycle.
-- Users may comment out the `shell` line entirely to fall back to their system default shell — preserve that as a documented option in any rewrites.
+- **Symlinked, not env-selected.** Unlike Linux, macOS uses a manual `ln -sf ~/.shellrc/kitty/macos/kitty.conf ~/.config/kitty/kitty.conf` (see root `README.md`). Reason: GUI-launched kitty on macOS doesn't inherit shell env vars, so `KITTY_CONFIG_DIRECTORY` wouldn't be set when kitty starts.
+- **No `include` line.** Because this file *is* the symlink target at `~/.config/kitty/kitty.conf`, including itself would loop. Machine-local tweaks should go in `~/.shellrc/bash_local_interactive.bash` (env vars kitty respects) or live in a separate `kitty.local.conf` users `include` from this file manually.
+- **`bash -li` (login + interactive) is required.** macOS GUI-launched processes don't get a login shell automatically, so we force one here to pick up `/opt/homebrew/bin` on PATH and the rest of the env construction.
+- **Hardcoded Homebrew prefix `/opt/homebrew`.** Apple Silicon only. Don't add Intel Mac (`/usr/local`) fallbacks unless explicitly asked.
+- **Cosmetic defaults stay commented** so users without Nerd Fonts still get a working terminal on first launch.
 
 ### Testing Requirements
 
-- Quit kitty entirely (right-click menu-bar icon → Quit) before relaunching to test config changes; reloading isn't sufficient for `shell` directive changes.
-- Verify Homebrew paths exist: `ls -la /opt/homebrew/bin/bash /opt/homebrew/bin/fish` before assuming they're valid.
+After edits, **fully quit kitty** (right-click the menu-bar icon → Quit; not just close windows) and relaunch:
+
+```bash
+ls -l ~/.config/kitty/kitty.conf            # confirm the symlink
+kitty --debug-config 2>&1 | grep -i shell   # confirms shell directive parsed
+```
 
 ### Common Patterns
 
-- One-line `shell` directive that chains bash → fish via `exec`, so process tree shows fish (not bash → fish).
+- Single `kitty.conf`; no helper scripts.
+- Hardcoded Homebrew paths (Apple Silicon).
 
 ## Dependencies
 
 ### Internal
 
-- `../../profile.bash` — entry point invoked because of `bash -li`.
-- `../../bash_system_envs.bash` — sets `KITTY_CONFIG_DIRECTORY` (informational on macOS; not used by GUI kitty).
+- `../../bash_system_paths.bash` / `../../bash_interactive_paths.bash` — Homebrew PATH setup that the spawned `bash -li` relies on.
+- `../../fonts/` — referenced (commented) by `font_family`.
 
 ### External
 
-- Homebrew (Apple Silicon prefix).
-- bash and fish installed via Homebrew.
+- kitty terminal emulator on macOS (Homebrew `kitty`).
+- Homebrew `bash` at `/opt/homebrew/bin/bash` (system `/bin/bash` is too old).
+- Homebrew `fish` at `/opt/homebrew/bin/fish`.
 
 <!-- MANUAL: -->

@@ -1,48 +1,57 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-04 | Updated: 2026-05-04 -->
+<!-- Generated: 2026-05-10 | Updated: 2026-05-10 -->
 
 # kitty
 
 ## Purpose
-Per-OS kitty terminal emulator configurations. Split into `macos/` and `linux/` subdirectories because the path to the bash and fish binaries differs (`/opt/homebrew/bin/...` on macOS, `/bin/bash` and `/usr/bin/fish` on Linux). The parent `bash_system_envs.bash` exports `KITTY_CONFIG_DIRECTORY="$HOME/.shellrc/kitty/$OS_TYPE"` so kitty picks the correct variant automatically — except on macOS, where (per README.md) the env var isn't propagated into the kitty process and a manual symlink is required.
+Per-OS configuration for the [kitty](https://sw.kovidgoyal.net/kitty/) terminal emulator. Split into `macos/` and `linux/`
+because the path to bash and fish differs by platform (Homebrew vs. distro-managed). The Linux config is selected
+automatically via the `KITTY_CONFIG_DIRECTORY` env var exported from `../bash_system_envs.bash`; macOS users symlink
+`macos/kitty.conf` into `~/.config/kitty/kitty.conf` (see root `README.md` install steps).
 
 ## Subdirectories
 
 | Directory | Purpose |
 |-----------|---------|
-| `macos/` | kitty.conf for macOS (Homebrew bash and fish paths). See `macos/AGENTS.md` |
-| `linux/` | kitty.conf for Linux (system bash and fish paths, with an `include` of the user's existing `~/.config/kitty/kitty.conf` so distro/system settings layer underneath). See `linux/AGENTS.md` |
+| `linux/` | Linux kitty config; uses `/bin/bash` + `/usr/bin/fish` (see `linux/AGENTS.md`). |
+| `macos/` | macOS kitty config; uses Homebrew `/opt/homebrew/bin/{bash,fish}` (see `macos/AGENTS.md`). |
 
 ## For AI Agents
 
 ### Working In This Directory
 
-- Both configs use the kitty `shell` directive to launch bash with `-li -c "exec /path/to/fish"`. This is the mechanism that lets bash construct the environment (via `profile.bash` → `bashrc.bash`) before fish takes over.
-- macOS uses `bash -li` (login + interactive); Linux uses `bash -i` (interactive only). The macOS variant uses `-li` because GUI-launched kitty doesn't go through a login shell otherwise, so env vars set in `bash_interactive_envs.bash` would be missing.
-- Most cosmetic settings (`font_family`, `font_size`, `scrollback_lines`, etc.) are commented out — users opt in by uncommenting after installing fonts. Don't uncomment them by default.
-- The Linux config `include`s `~/.config/kitty/kitty.conf` at the top, layering distro defaults underneath repo overrides. macOS does not, because the macOS install procedure replaces `~/.config/kitty/kitty.conf` with a symlink to this file (which would create a circular include).
+- **Tier-3 only.** Kitty is optional; Tier-1/2 users won't have it installed. Nothing here should be required by the bash/fish startup chain.
+- **Two configs that intentionally diverge.** Don't merge them — the `shell` directive's binary paths are platform-specific. Shared defaults belong in user-level overrides (Linux's `kitty.conf` `include`s `~/.config/kitty/kitty.conf`); macOS doesn't have an `include` because it symlinks the OS-specific file directly into the canonical location.
+- **`KITTY_CONFIG_DIRECTORY` selects the Linux config.** Set in `../bash_system_envs.bash` to `~/.shellrc/kitty/$OS_TYPE`. If you rename the subdirectories, update that file too.
+- **Linux session-manager gotcha** (documented in root `README.md`): some desktops launch kitty without sourcing `~/.profile`, so `KITTY_CONFIG_DIRECTORY` is unset. Users add `source ~/.profile` to `~/.xprofile` to fix it.
+- **The `shell` directive controls the bash→fish handoff.** It runs `bash -li` (login + interactive, so the full env construction happens) and then `exec fish`. Commenting it out reverts to the system default shell.
+- **Font + cosmetic settings are intentionally commented out** so the Tier-1/2 install works without requiring Nerd Fonts. Keep new cosmetic options commented unless they're safe everywhere.
 
 ### Testing Requirements
 
-- `kitty --debug-config` prints the resolved configuration; use it to verify the right shell binary is being invoked.
-- Confirm kitty actually launches by quitting all kitty windows and opening a fresh one. If kitty silently exits, the `shell` directive is the most likely culprit (bad path).
+After edits, fully restart kitty (some directives don't apply via `kitty @ load-config`). Quick sanity check:
+
+```bash
+kitty --debug-config 2>&1 | head -40    # shows which config kitty is reading
+```
+
+For Linux, also verify `KITTY_CONFIG_DIRECTORY` is set in the user's session env (otherwise kitty silently falls back to `~/.config/kitty/kitty.conf`).
 
 ### Common Patterns
 
-- `KITTY_CONFIG_DIRECTORY` is the env var that selects which subdir kitty reads from on Linux. macOS users symlink instead, per README.md.
-- On Linux, `KITTY_CONFIG_DIRECTORY` is exported by `bash_system_envs.bash` only if some shell has sourced `~/.profile` (or `~/.bashrc`) in the user's session. Desktop launchers under systemd-managed user sessions can launch kitty without that env var being present — the documented mitigation is `source ~/.profile` from `~/.xprofile`. See README.md "Linux users" note in the install section.
+- Each OS subdirectory holds exactly one `kitty.conf`.
+- Defaults stay commented; users uncomment per machine.
 
 ## Dependencies
 
 ### Internal
 
-- `../bash_system_envs.bash` exports `KITTY_CONFIG_DIRECTORY` based on `OS_TYPE`.
-- `../profile.bash` and `../bashrc.bash` — the scripts the `shell` directive transitively executes.
-- `../fonts/` — bundled fonts referenced (commented) in both kitty.conf files.
+- `../bash_system_envs.bash` — exports `KITTY_CONFIG_DIRECTORY`.
+- `../fonts/` — JetBrains Mono Nerd Font, referenced by the commented `font_family` line.
 
 ### External
 
-- kitty terminal emulator (https://sw.kovidgoyal.net/kitty/).
-- bash and fish at the paths hardcoded in each config.
+- [kitty terminal](https://sw.kovidgoyal.net/kitty/), `kitty-terminfo` package on remote hosts.
+- GNU bash and fish at the platform-specific paths each `kitty.conf` hardcodes.
 
 <!-- MANUAL: -->

@@ -1,43 +1,48 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-04 | Updated: 2026-05-04 -->
+<!-- Generated: 2026-05-10 | Updated: 2026-05-10 -->
 
 # bin
 
 ## Purpose
-Helper scripts intended to be runnable via PATH. The parent `bash_interactive_paths.bash` includes a commented-out template (`prepend_to_path "$HOME/.shellrc/bin"`) so users can opt this directory into their PATH. Currently holds only the bash→fish alias translator.
+Helper scripts invoked at shell startup. Currently a single script: `fish_aliases.bash`, the bridge that lets fish reuse
+the bash-defined aliases in `bash_aliases.bash` without duplicating them.
 
 ## Key Files
 
 | File | Description |
 |------|-------------|
-| `fish_aliases.bash` | Sources `~/.shellrc/bash_aliases.bash` and emits each `alias` definition reformatted as fish syntax (`alias NAME 'BODY'`). Invoked from `config.fish` via `eval (~/.shellrc/bin/fish_aliases.bash)`. Marked executable. |
+| `fish_aliases.bash` | Sources `~/.shellrc/bash_aliases.bash`, walks every `alias` the bash builtin emits, decodes bash's `'\''`-escaped single quotes, re-encodes for fish (only `\\` and `\'` need escaping inside fish single-quoted strings), and prints `alias name 'body'; …` for `config.fish` to `eval`. Marked executable. |
 
 ## For AI Agents
 
 ### Working In This Directory
 
-- `fish_aliases.bash` is a string-translation bridge: it relies on the bash `alias` builtin's output format and a regex (`^alias ([^=]+)=.(.+).$`) to extract names and bodies. If you change quoting or escaping in `bash_aliases.bash`, re-run `bash ~/.shellrc/bin/fish_aliases.bash` and confirm the output is valid fish.
-- Aliases whose body is not valid fish syntax (e.g., bash-specific `$()`, arrays, `[[ ]]`) will be silently emitted but break fish on eval. The convention is to push such logic into a paired bash function + fish function rather than aliasing.
-- This directory is not on PATH by default — the user must opt in by editing `bash_interactive_paths.bash`. New scripts placed here should not assume PATH membership.
+- **`fish_aliases.bash` is invoked, not sourced.** `config.fish` runs `eval (~/.shellrc/bin/fish_aliases.bash)`, capturing stdout. Anything other than alias-emitting `printf` lines pollutes that eval, so don't add stray `echo`/log output.
+- **The quoting logic is load-bearing.** Bash's `alias` builtin always wraps values in single quotes and renders embedded single quotes as `'\''`; fish's single-quoted strings only honor `\\` and `\'`. The translation order in the script (decode bash → escape backslash → escape apostrophe) matters — don't reorder.
+- **Keep aliases fish-compatible upstream.** If an alias in `bash_aliases.bash` uses bash-only syntax (`$()`, arrays, `[[ … ]]`), the fish side will silently inherit broken syntax. Prefer paired functions in `bash_functions_custom.bash` + `fish_functions_custom.fish` when an alias can't be expressed in both shells.
+- **Don't add a fish shebang.** The script is bash (`#!/usr/bin/env bash`) on purpose — it relies on bash's `alias` builtin and `BASH_REMATCH`.
+- **PATH inclusion is opt-in.** `bash_interactive_paths.bash` has a commented-out `prepend_to_path "$HOME/.shellrc/bin"`. New scripts here are not on `$PATH` for users by default.
 
 ### Testing Requirements
 
-- Run `bash ~/.shellrc/bin/fish_aliases.bash` and inspect the output for malformed lines.
-- Smoke-test by piping into a transient fish session: `fish -c "$(bash ~/.shellrc/bin/fish_aliases.bash)"`.
+```bash
+~/.shellrc/bin/fish_aliases.bash | head      # sanity-check the fish alias output
+fish -ic 'alias | head'                       # confirm fish actually picks them up
+```
 
 ### Common Patterns
 
-- Scripts here use `#!/bin/bash` shebangs and source other `~/.shellrc/*.bash` files to reuse functions/aliases rather than duplicating logic.
+- Single-purpose, idempotent shell scripts that get invoked at shell startup.
 
 ## Dependencies
 
 ### Internal
 
-- `../bash_aliases.bash` — the source of truth for aliases that this script translates.
-- `../config.fish` — the consumer that evals this script's output at fish startup.
+- `../bash_aliases.bash` — source of truth for aliases.
+- `../config.fish` — the consumer that `eval`s this script's output.
 
 ### External
 
-- GNU bash (for the `alias` builtin output format and regex matching with `=~`).
+- GNU bash 4+ (uses `BASH_REMATCH`, parameter substitution).
 
 <!-- MANUAL: -->

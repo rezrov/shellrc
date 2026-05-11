@@ -1,45 +1,53 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-04 | Updated: 2026-05-04 -->
+<!-- Generated: 2026-05-10 | Updated: 2026-05-10 -->
 
 # kitty/linux
 
 ## Purpose
-kitty configuration for Linux. Uses system-wide binary paths (`/bin/bash`, `/usr/bin/fish`). Layered on top of any user-level `~/.config/kitty/kitty.conf` via an `include` directive so distro defaults remain in effect underneath.
+Linux-specific kitty configuration. Selected automatically when `KITTY_CONFIG_DIRECTORY=$HOME/.shellrc/kitty/linux`
+(exported by `../../bash_system_envs.bash`). Hardcodes distro-standard binary paths: `/bin/bash` and `/usr/bin/fish`.
 
 ## Key Files
 
 | File | Description |
 |------|-------------|
-| `kitty.conf` | Linux kitty configuration. Includes `~/.config/kitty/kitty.conf` first, then sets `shell /bin/bash -i -c "exec /usr/bin/fish"`. Cosmetic options commented out. |
+| `kitty.conf` | `include`s the user's `~/.config/kitty/kitty.conf` first, then sets `shell /bin/bash -i -c "exec /usr/bin/fish"`. The `font_family`, `font_size`, scrollback, padding, and theme lines are present but commented out. |
 
 ## For AI Agents
 
 ### Working In This Directory
 
-- The `shell` directive uses `bash -i` (interactive, NOT login). This works on Linux because the user's display manager / desktop session typically already runs a login shell up the tree, so `~/.profile` has already executed.
-- The leading `include ~/.config/kitty/kitty.conf` means user-level kitty settings (themes, custom keybinds) layered there are preserved and overridden where needed by this file.
-- Paths assume distro-standard locations. On Arch, NixOS, or other non-FHS-strict distros, `/usr/bin/fish` and `/bin/bash` may need adjustment.
-- This file is selected automatically by kitty when the parent `bash_system_envs.bash` exports `KITTY_CONFIG_DIRECTORY="$HOME/.shellrc/kitty/linux"` — no symlinking required, unlike macOS.
+- **The `include ~/.config/kitty/kitty.conf` line is intentional** — it lets users keep machine-local kitty tweaks (window size, theme variants) outside the repo, and our config layers on top. Don't remove it.
+- **`shell /bin/bash -i …`** uses the distro bash (no login flag, unlike macOS). If the user's distro packages bash elsewhere, they'll need to override this — do not silently change the path.
+- **`exec /usr/bin/fish`** assumes fish is installed at the standard location. If you parameterize this, do it via the user's `~/.config/kitty/kitty.conf` override, not here.
+- **Selected by env var, not symlink.** Unlike macOS, no symlink dance is required — the `KITTY_CONFIG_DIRECTORY` mechanism handles selection. But systemd/desktop-launcher quirks may bypass `~/.profile`; the root `README.md` documents the `~/.xprofile` workaround.
+- **Cosmetic defaults stay commented.** Keep `font_family`, `background`, etc. commented so a user without Nerd Fonts gets a working terminal on first launch.
 
 ### Testing Requirements
 
-- After config changes, in an existing kitty window: `Ctrl+Shift+F5` reloads. For `shell` changes, restart kitty.
-- Confirm the include path resolves: `kitty --debug-config | grep -i include`.
+```bash
+echo "$KITTY_CONFIG_DIRECTORY"             # expect: …/shellrc/kitty/linux
+kitty --debug-config 2>&1 | grep -i shell  # confirms the shell directive parsed
+```
+
+Restart kitty (close all windows) after edits; some directives apply only at launch.
 
 ### Common Patterns
 
-- Layer composition via `include` rather than wholesale replacement of the user's existing kitty config.
+- Single `kitty.conf`; no helper scripts.
+- `include` then override: user file first, then our directives.
 
 ## Dependencies
 
 ### Internal
 
-- `../../bash_system_envs.bash` — exports `KITTY_CONFIG_DIRECTORY=$HOME/.shellrc/kitty/linux` on Linux, which is how kitty finds this file.
-- `../../profile.bash` / `../../bashrc.bash` — sourced transitively when bash starts.
+- `../../bash_system_envs.bash` — sets `KITTY_CONFIG_DIRECTORY` so kitty picks this directory.
+- `../../fonts/` — referenced (commented) by `font_family`.
 
 ### External
 
-- bash at `/bin/bash`, fish at `/usr/bin/fish`.
-- Optionally, a user-maintained `~/.config/kitty/kitty.conf` (gracefully skipped if missing).
+- kitty terminal emulator on Linux.
+- `/bin/bash` (distro bash, version irrelevant — only used to exec fish).
+- `/usr/bin/fish`.
 
 <!-- MANUAL: -->
