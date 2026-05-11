@@ -158,9 +158,15 @@ two-line rainbow prompt with Nerd-Font glyphs (assumes you've installed a Nerd F
 
 ```fish
 tide configure --auto --style=Rainbow --prompt_colors='True color' --show_time=No --rainbow_prompt_separators=Round --powerline_prompt_heads=Round --powerline_prompt_tails=Round --powerline_prompt_style='Two lines, character and frame' --prompt_connection=Solid --powerline_right_prompt_frame=No --prompt_connection_andor_frame_color=Darkest --prompt_spacing=Sparse --icons='Many icons' --transient=Yes
+set -U tide_cmd_duration_threshold 1
+set -U tide_context_always_display true
+set -U tide_left_prompt_items os pwd git
+fish_config theme choose 'Tomorrow Night Bright'
 ```
 
-Re-run `tide configure` interactively any time you want to adjust.
+Re-run `tide configure` interactively any time you want to adjust the command prompt, and fish_config to set your color theme.
+Note that my suggested settings above assume a dark-background terminal (which is set in kitty.conf). If you prefer a light
+theme, change the background RGB in kitty.conf and select a light theme with fish_config.
 
 If you'd like a colorful fish logo printed each time you start a fresh interactive shell, install
 `laughedelic/fish_logo`:
