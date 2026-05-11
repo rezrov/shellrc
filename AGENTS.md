@@ -17,8 +17,8 @@ Cross-platform interactive shell configuration that delivers a consistent experi
 | `bash_functions_custom.bash` | User-owned bash functions: `rmts`, `r` (screen backgrounder), `gen_rand`, and the `sshagent_*` family (only defined when `ssh-add` and `ssh-agent` are on PATH) |
 | `bash_system_envs.bash` | Env vars for both interactive AND non-interactive shells. Sets `KITTY_CONFIG_DIRECTORY` per OS and `MOUNT_DIR` |
 | `bash_system_paths.bash` | PATH modifications for both interactive AND non-interactive shells. macOS Homebrew GNU coreutils prepending lives here, gated on `/opt/homebrew/bin/brew` existence |
-| `bash_local_envs.bash` | Env vars for interactive shells only: history sizing, `EDITOR`, `TZ`, `PS1`, umask, Homebrew paths |
-| `bash_local_paths.bash` | PATH modifications for interactive shells only. Contains commented-out templates for adding `~/.shellrc/bin`, npm, and pnpm prefixes |
+| `bash_interactive_envs.bash` | Env vars for interactive shells only: history sizing, `EDITOR`, `TZ`, `PS1`, umask, Homebrew paths |
+| `bash_interactive_paths.bash` | PATH modifications for interactive shells only. Contains commented-out templates for adding `~/.shellrc/bin`, npm, and pnpm prefixes |
 | `bash_aliases.bash` | Shell aliases (also consumed by fish via `bin/fish_aliases.bash`). OS-branched: macOS uses `ls -AFG`, Linux uses `ls -AF --color=always`, plus `bubu`, `kittyterm`, `ns`/`nsp`, `ef`, etc. |
 | `bash_set_colors.bash` | `dircolors` evaluation (with embedded `LS_COLORS` fallback for systems without `dircolors`) and cursor-style/color escape codes for color terminals |
 | `dircolors` | Solarized 256-color `dircolors` config, source: github.com/seebi/dircolors-solarized |

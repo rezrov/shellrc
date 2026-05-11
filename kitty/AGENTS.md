@@ -18,7 +18,7 @@ Per-OS kitty terminal emulator configurations. Split into `macos/` and `linux/` 
 ### Working In This Directory
 
 - Both configs use the kitty `shell` directive to launch bash with `-li -c "exec /path/to/fish"`. This is the mechanism that lets bash construct the environment (via `profile.bash` → `bashrc.bash`) before fish takes over.
-- macOS uses `bash -li` (login + interactive); Linux uses `bash -i` (interactive only). The macOS variant uses `-li` because GUI-launched kitty doesn't go through a login shell otherwise, so env vars set in `bash_local_envs.bash` would be missing.
+- macOS uses `bash -li` (login + interactive); Linux uses `bash -i` (interactive only). The macOS variant uses `-li` because GUI-launched kitty doesn't go through a login shell otherwise, so env vars set in `bash_interactive_envs.bash` would be missing.
 - Most cosmetic settings (`font_family`, `font_size`, `scrollback_lines`, etc.) are commented out — users opt in by uncommenting after installing fonts. Don't uncomment them by default.
 - The Linux config `include`s `~/.config/kitty/kitty.conf` at the top, layering distro defaults underneath repo overrides. macOS does not, because the macOS install procedure replaces `~/.config/kitty/kitty.conf` with a symlink to this file (which would create a circular include).
 

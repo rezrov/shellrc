@@ -25,7 +25,7 @@ elif [ "$OS_TYPE" = "linux" ]; then
   alias ns="ss -naut"
   alias nsp="ss -nautp"
   unalias ls >/dev/null 2>&1
-  alias ls="ls -AF --color=always"
+  alias ls="ls -AF --color=auto"
   case $osver in
     *gentoo*)
       alias e4="exec startxfce4"

@@ -15,3 +15,8 @@ if [ "$OS_TYPE" = "macos" ]; then
 else
   export MOUNT_DIR=/mnt
 fi
+
+# Grab host-specific system customizations not stored in the repo (.gitignored file)
+if [ -r "$HOME/.shellrc/bash_local_system.bash" ]; then
+  source "$HOME/.shellrc/bash_local_system.bash"
+fi

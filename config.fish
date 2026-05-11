@@ -28,11 +28,7 @@ if status --is-interactive
     ###########################
     # MODIFICATIONS HERE
 
-    if [ -d ~/.local/share/omf/pkg/colorman ]
-     source ~/.local/share/omf/pkg/colorman/init.fish
-    end
-
-    if [ -d ~/.local/share/omf/pkg/fish_logo ]
+    if functions -q fish_logo
         fish_logo
     end
 

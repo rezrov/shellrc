@@ -14,14 +14,14 @@ if is_interactive_shell; then
     fi
 fi
 
-# Grab any private bashrc customizations not stored in the repo (.gitignored file)
-if [ -r "$HOME/.shellrc/bashrc_private.bash" ]; then
-    source "$HOME/.shellrc/bashrc_private.bash"
-fi
-
-source "$HOME/.shellrc/bash_local_envs.bash"
-source "$HOME/.shellrc/bash_local_paths.bash"
+source "$HOME/.shellrc/bash_interactive_envs.bash"
+source "$HOME/.shellrc/bash_interactive_paths.bash"
 source "$HOME/.shellrc/bash_aliases.bash"
 source "$HOME/.shellrc/bash_set_colors.bash"
+
+# Grab host-specific interactive customizations not stored in the repo (.gitignored file)
+if [ -r "$HOME/.shellrc/bash_local_interactive.bash" ]; then
+    source "$HOME/.shellrc/bash_local_interactive.bash"
+fi
 
 export PATH

@@ -11,10 +11,13 @@ set_os_type
 
 if [ "$OS_TYPE" = "macos" ]; then
   if [ -x "/opt/homebrew/bin/brew" ]; then
-    prepend_to_path "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-    prepend_to_path "/opt/homebrew/opt/gnu-sed/libexec/gnubin"
-    prepend_to_path "/opt/homebrew/opt/grep/libexec/gnubin"
-    prepend_to_path "/opt/homebrew/opt/findutils/libexec/gnubin"
+    # Prepend gnubin/uubin dirs for any installed keg-only GNU or uutils
+    # formulae (gnu-sed, gnu-tar, grep, findutils, coreutils, uutils-*, etc.).
+    # Discovered dynamically so installing or removing a formula takes effect
+    # on the next shell start without editing this file.
+    for d in /opt/homebrew/opt/*/libexec/gnubin /opt/homebrew/opt/*/libexec/uubin; do
+      [ -d "$d" ] && prepend_to_path "$d"
+    done
     prepend_to_path "/opt/homebrew/sbin"
     prepend_to_path "/opt/homebrew/bin"
     [ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}";

@@ -1,29 +1,30 @@
 # Shellrc - Shell setup featuring Fish and Kitty #
 
-This is a set of bash/fish configuration files and associated scripts that aim to provide a consistent interactive shell
+This is a set of bash/fish configuration files and associated scripts that aim to provide a consistent, rich interactive shell
 experience across Linux and macOS. It features [fish](https://fishshell.com/) shell and the
 [kitty](https://sw.kovidgoyal.net/kitty/) terminal emulator, but can be adjusted to use bash and your favorite
 terminal emulator if you prefer.
 
-## A Note For Mac Users ##
+## A Few Notes For Mac Users ##
 
 **Apple Silicon Macs only.** This project hardcodes the Homebrew prefix at `/opt/homebrew` and is not tested or
 supported on Intel Macs.
 
 Everything here assumes you've already installed [Homebrew](https://brew.sh/). If you're using [Nix](https://nixos.org/)
 or another package manager instead, you might need to tweak a few things. In any case, **you need to be using a
-relatively recent version of GNU bash**, not the bash shell that comes with macOS.
-
-Install GNU bash via your preferred package manager. To make it your default shell, follow the top answer here:
-https://stackoverflow.com/questions/77052638/changing-default-shell-from-zsh-to-bash-on-macos-catalina-and-beyond
-
-This project also relies on the GNU versions of `sed`, `tar`, `grep`, and the `findutils` family being on your `$PATH`
-(several helper functions and aliases use GNU-only flags, and `bash_system_paths.bash` prepends the Homebrew
-`gnubin` directories accordingly). Install them with Homebrew:
+relatively recent version of GNU bash**, not the bash shell that comes with macOS. This project also relies on the
+GNU versions of `sed`, `tar`, `grep`, and the `findutils` family being on your `$PATH` (several helper functions 
+and aliases use GNU-only flags, and `bash_system_paths.bash` prepends the Homebrew `gnubin` directories accordingly).
+To install them with Homebrew:
 
 ```bash
-brew install gnu-sed gnu-tar grep findutils
+brew install gnu-sed gnu-tar grep findutils uutils-coreutils
 ```
+
+To make bash your default shell (recommended), follow the top answer here:
+https://stackoverflow.com/questions/77052638/changing-default-shell-from-zsh-to-bash-on-macos-catalina-and-beyond
+
+Once you have bash set as your system default, exit your current terminal and start a new one to pick up the change.
 
 ## Prerequisites ##
 
@@ -31,15 +32,17 @@ brew install gnu-sed gnu-tar grep findutils
 * [kitty](https://sw.kovidgoyal.net/kitty/) terminal emulator (optional)
 * [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) (optional, see below)
 
-If you choose to omit kitty or fish, you might need to tweak some of the configuration settings.
+If you choose to omit kitty or fish, you might need to tweak some of the configuration settings. macOS users can install
+the "fish" and "kitty" packages via Homebrew. It's also a good idea to install the package "kitty-terminfo" on any
+system you will be logging into remotely via SSH, it's available in most Linux package managers.
 
 ## Installation ##
 
-I recommend forking this repo and cloning your own version so you can track your own modifications and selectively merge
+I highly recommend forking this repo and cloning your own version so you can track your own modifications and selectively merge
 any upstream improvements I make in the future. If you come up with something cool, send me a pull request and I'll take
 a look.
 
-Once you've got your own fork, run the following:
+Once you've got your own fork, run the following (replace 'yourusername' with your github user):
 
 ```bash
 cd
@@ -54,7 +57,11 @@ ln -sf .shellrc/profile.bash .profile
 ln -sf .shellrc/bashrc.bash .bashrc
 ```
 
-MacOS users only: Since your bash environment variables won't be supplied to the
+Your original shell startup files are now moved to ~/backuprc, and all of your shell
+startup configuration is now contained in the cloned repo under ~/.shellrc. You can
+delete ~/backuprc when you feel comfortable doing so.
+
+macOS users only: Since your bash environment variables won't be supplied to the
 kitty process when it starts up, you'll need to symlink the kitty configuration file
 from its default location to the one in your .shellrc directory. (If you find a better
 way to do this, let me know.)
@@ -84,8 +91,7 @@ After logging out and back in, `KITTY_CONFIG_DIRECTORY` will be set in your sess
 environment and kitty will pick up the right config.
 
 After you've completed installation and read the explanation of all the installed files below, review the contents of 
-backuprc/ to see if there's anything there you want to pull back into your new configuration. After you've done that,
-you can delete backuprc/.
+backuprc/ to see if there's anything there you want to pull back into your new configuration.
 
 Now you're ready to try the new stuff. Close all your terminals (on macOS, right-click 
 the kitty icon in the menu bar and select "Quit") and open a new kitty session. You should have a new
@@ -131,26 +137,42 @@ ln -sf ~/.shellrc/config.fish ~/.config/fish/config.fish
 
 Take a look at .shellrc/config.fish now if you'd like to see what it's going to do. 
 
-### Oh My Fish ###
+### Fisher and Tide ###
 
-[Oh My Fish](https://github.com/oh-my-fish/oh-my-fish) is a popular plugin manager for fish shell. There are others out 
-there if you prefer an alternative.
+[Fisher](https://github.com/jorgebucaran/fisher) (plugin manager)
+[Tide](https://github.com/IlanCosman/tide) (fancy shell prompt)
 
-Install and configure OMF, BobTheFish (a theming plugin) and a couple other things from within fish shell:
+Install Fisher, then Tide, from within fish shell:
 
 ```fish
-set -U theme_date_timezone EST5EDT
-set -U theme_date_format "+%Y-%m-%d %H:%M:%S"
-set -U theme_nerd_fonts yes         # assumes you installed a font from nerd-fonts as described above
-set -U theme_powerline_fonts yes
-set -U theme_color_scheme tomorrow-night
-curl -L https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install -o fishsetup.tmp.fish
-fish ./fishsetup.tmp.fish --noninteractive -y
-rm -f ./fishsetup.tmp.fish
-echo 'omf install fish_logo colorman bobthefish' | fish
+curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+fisher install IlanCosman/tide@v6
 ```
 
-Close and reopen your fish shell to see the changes.
+Tide's default prompt activates immediately. To customize, run `tide configure` and walk through the interactive
+wizard. The wizard explicitly asks whether you have a Nerd Font installed; answer accordingly so the icon set matches
+what your terminal can render.
+
+If you'd like an attractive starting point you can refine later, the following non-interactive command applies a
+two-line rainbow prompt with Nerd-Font glyphs (assumes you've installed a Nerd Font as described above):
+
+```fish
+tide configure --auto --style=Rainbow --prompt_colors='True color' --show_time=No --rainbow_prompt_separators=Round --powerline_prompt_heads=Round --powerline_prompt_tails=Round --powerline_prompt_style='Two lines, character and frame' --prompt_connection=Solid --powerline_right_prompt_frame=No --prompt_connection_andor_frame_color=Darkest --prompt_spacing=Sparse --icons='Many icons' --transient=Yes
+```
+
+Re-run `tide configure` interactively any time you want to adjust.
+
+If you'd like a colorful fish logo printed each time you start a fresh interactive shell, install
+`laughedelic/fish_logo`:
+
+```fish
+fisher install laughedelic/fish_logo
+```
+
+The bundled `config.fish` detects this via `functions -q fish_logo` and calls it on interactive shell startup.
+
+For other Fisher plugins, browse [awesome-fish](https://github.com/jorgebucaran/awesome-fish). Fisher's API is
+intentionally tiny: `fisher install user/repo`, `fisher remove user/repo`, `fisher list`, `fisher update`.
 
 ### Get Your Git Under Control ###
 
@@ -191,18 +213,29 @@ modify this file.
 
 Put your custom bash functions in this file.
 
-### bash_local_envs.bash ###
+### bash_interactive_envs.bash ###
 
 Put environment variables (not including $PATH) and other shell settings that are only relevant for interactive shells 
 in this file.
 
-### bash_local_paths.bash ###
+### bash_interactive_paths.bash ###
 
 Put $PATH modifications that are relevant only for interactive shells in this file.
 
+### bash_local_interactive.bash ###
+
+Optional .gitignored hook for host-specific interactive customizations (API tokens, work paths, machine-only aliases).
+Create this file in `~/.shellrc/` to opt in; it's sourced at the end of `bashrc.bash` so its values override earlier
+defaults.
+
+### bash_local_system.bash ###
+
+Optional .gitignored hook for host-specific env or PATH modifications that need to apply to all shells, not just
+interactive ones. Create this file in `~/.shellrc/` to opt in; it's sourced at the end of `bash_system_envs.bash`.
+
 ### bash_system_envs.bash ###
 
-Put environment variables (not including $PATH) and other shell settings for relevant for both interactive and 
+Put environment variables (not including $PATH) and other shell settings relevant for both interactive and 
 non-interactive shells in this file.
 
 ### bash_system_paths.bash ###
@@ -211,20 +244,54 @@ Put $PATH modifications relevant for both interactive and non-interactive shells
 
 ### bash_set_colors.bash ###
 
-Sets colors for directory listings, and the cursor style.
+Centralized color setup for interactive bash shells: `LS_COLORS` (GNU/uutils ls), `LSCOLORS` (BSD ls), a tput-gated
+colored `PS1`, and `FORCE_COLOR` for tools that respect it. See header comments in the file for details.
 
-### fish_functions.fish
+### dircolors ###
 
-Custom fish functions used by other scripts in this configuration. Generally you won't want to
+Color definitions for GNU `dircolors`, sourced by `bash_set_colors.bash` to populate `LS_COLORS`. Solarized 256-color
+scheme from github.com/seebi/dircolors-solarized; swap or edit to change how `ls` colors files. After editing,
+regenerate the embedded fallback in `bash_set_colors.bash` with `dircolors -b ~/.shellrc/dircolors`.
+
+### bashrc.bash ###
+
+This file is intended to be symlinked from ~/.bashrc. The entry point for interactive bash shells. Generally you
+won't want to modify this file.
+
+### config.fish ###
+
+This file is intended to be symlinked from ~/.config/fish/config.fish. The entry point for fish shell. Customizations
+belong inside the "MODIFICATIONS HERE" block.
+
+### fish_functions.fish ###
+
+Fish shell functions used by other scripts in this configuration. Generally you won't want to
 modify this file.
 
 ### fish_functions_custom.fish ###
 
 Put your custom fish functions in this file.
 
+### bin/fish_aliases.bash ###
+
+Reads aliases from `bash_aliases.bash` and re-emits them in fish syntax. Invoked by `config.fish` at fish startup.
+Don't modify directly — keep aliases in `bash_aliases.bash` valid for both shells (avoid bash-only constructs like
+`$()` or arrays).
+
 ### gitinclude ###
 
 This file is intended to be included from your ~/.gitconfig file. Put your personal git configuration here.
+
+### fonts/ ###
+
+JetBrains Mono Nerd Font TTF files, bundled for convenience. Install them at the OS level (Font Book on macOS;
+`~/.local/share/fonts/` plus `fc-cache -fv` on Linux). Referenced (commented out) in the kitty configs.
+
+### kitty/ ###
+
+Per-OS kitty terminal configurations under `macos/` and `linux/` subdirectories, each with a `kitty.conf` containing
+the right paths to bash and fish for that OS. The Linux variant is selected automatically via
+`$KITTY_CONFIG_DIRECTORY`; macOS uses a manual symlink (see install section).
 
 ### profile.bash ###
 
